@@ -1,26 +1,22 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const dotenv = require("dotenv");
+const connectDB = require("./config/db");
+const gamesRoutes = require("./routes/games");
+dotenv.config();
 
 const app = express();
-app.use(express.json(),cors())
+const PORT = process.env.PORT || 5000;
 
-//connect to MongoDB
-mongoose.connect("mongodb+srv://charmainemangorima:charmy@arcade.x6m8qlh.mongodb.net/?retryWrites=true&w=majority&appName=arcade")
-.then(()=>{
-    console.log("Connected to MongoDB");
-})
-.catch((err)=>{
-    console.log(err);
-})
+// Middleware
+app.use(express.json());
+app.use(cors());
 
-//routes
-app.use("/games",require("./routes/games"))
-console.log("Games routes registered");
+// MongoDB Connection
+connectDB();
 
-//start server
-const PORT = 5000;
-app.listen(PORT,()=>{
-    console.log(`Server is running on port ${PORT}`);
-})
+// Routes
+app.use("/games", gamesRoutes);
 
+app.listen(PORT, () => console.log(`🌸 Server running on port ${PORT}`));
