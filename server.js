@@ -16,9 +16,10 @@ mongoose.connect("mongodb+srv://charmainemangorima:charmy@arcade.x6m8qlh.mongodb
 
 //routes
 app.use("/games",require("./routes/games"))
+console.log("Games routes registered");
 
 //start server
-const PORT = 3000;
+const PORT = 5000;
 app.listen(PORT,()=>{
     console.log(`Server is running on port ${PORT}`);
 })

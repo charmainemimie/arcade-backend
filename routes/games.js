@@ -42,5 +42,6 @@ router.delete("/:id", async (req, res) => {
   if (!game) return res.status(404).json({ message: "Game not found" });
   res.json({ message: "Game deleted" });
 });
+console.log("routes in games.js loaded");
 
 module.exports = router;
