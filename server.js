@@ -15,7 +15,7 @@ const corsOptions = {
     "http://localhost:5173", // client app
     "http://localhost:5174",
     "https://miracle-arcade.netlify.app/",
-    "https://miracle-arcade.vercel.app",
+    "https://miracle-arcade-admin.netlify.app/",
   ],
   credentials: true,
   optionsSuccessStatus: 200,
