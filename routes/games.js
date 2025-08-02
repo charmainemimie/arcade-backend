@@ -16,7 +16,22 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage });
+// File filter for images only
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image/")) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only image files are allowed!"), false);
+  }
+};
+
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+});
 
 // Serve static files from uploads folder
 router.use("/uploads", express.static("uploads"));
@@ -29,6 +44,14 @@ router.get("/test", (req, res) => {
 // CREATE (with image upload)
 router.post("/", upload.single("image"), async (req, res) => {
   try {
+    // Validate required fields
+    const { name, price, category, status } = req.body;
+    if (!name || !price || !category || !status) {
+      return res.status(400).json({
+        message: "Missing required fields: name, price, category, status",
+      });
+    }
+
     const game = new Game({
       ...req.body,
       image: req.file ? `/uploads/${req.file.filename}` : null,
@@ -36,10 +59,10 @@ router.post("/", upload.single("image"), async (req, res) => {
     await game.save();
     res.status(201).json(game);
   } catch (err) {
+    console.error("Error creating game:", err);
     res.status(500).json({ error: err.message });
   }
 });
-
 
 //READ all games
 router.get("/", async (req, res) => {
