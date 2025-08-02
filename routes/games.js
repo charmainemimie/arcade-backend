@@ -1,18 +1,45 @@
 const express = require("express");
 const Game = require("../models/games");
+const multer = require("multer");
+const path = require("path");
+
 const router = express.Router();
 
-//test route
+// Setup storage engine for image uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "uploads/"); // directory to save images
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ storage });
+
+// Serve static files from uploads folder
+router.use("/uploads", express.static("uploads"));
+
+// Test route
 router.get("/test", (req, res) => {
   res.send("Games route is working");
 });
 
-//CREATE
-router.post("/", async (req, res) => {
-  const game = new Game(req.body);
-  await game.save();
-  res.status(201).json(game);
+// CREATE (with image upload)
+router.post("/", upload.single("image"), async (req, res) => {
+  try {
+    const game = new Game({
+      ...req.body,
+      image: req.file ? `/uploads/${req.file.filename}` : null,
+    });
+    await game.save();
+    res.status(201).json(game);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
+
 
 //READ all games
 router.get("/", async (req, res) => {
