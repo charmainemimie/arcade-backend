@@ -3,21 +3,29 @@ const Game = require("../models/games");
 const router = express.Router();
 const { upload } = require("../config/cloudinary");
 
-// CREATE a game with image upload
-router.post("/", upload.single("image"), async (req, res) => {
+
+// CREATE a game (image is a URL in req.body.image)
+router.post("/", async (req, res) => {
   try {
+    const { name, price, category, status, image, description, rating } = req.body;
+
     // Validate required fields
-    const { name, price, category, status } = req.body;
-    if (!name || !price || !category || !status) {
+    if (!name || !price || !category || !status || !image) {
       return res.status(400).json({
-        message: "Missing required fields: name, price, category, status",
+        message: "Missing required fields: name, price, category, status, or image",
       });
     }
 
     const game = new Game({
-      ...req.body,
-      image: req.file ? req.file.path : null, // Cloudinary URL
+      name,
+      price,
+      category,
+      status,
+      image,         // It's a URL string now, not a file
+      description,
+      rating,
     });
+
     await game.save();
     res.status(201).json(game);
   } catch (err) {
@@ -25,6 +33,7 @@ router.post("/", upload.single("image"), async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
 
 //READ all games
 router.get("/", async (req, res) => {
