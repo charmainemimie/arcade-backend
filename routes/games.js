@@ -1,27 +1,31 @@
 const express = require("express");
 const Game = require("../models/games");
 const router = express.Router();
-const { upload } = require("../config/cloudinary");
+const multer = require("multer");
+const { uploadImageToCloudinary } = require("../cloudinary");
 
+// Set up multer for memory storage
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
-// CREATE a game (image is a URL in req.body.image)
-router.post("/", async (req, res) => {
+// CREATE a game
+router.post("/", upload.single('image'), async (req, res) => {
   try {
-    const { name, price, category, status, image, description, rating } = req.body;
+    const { name, price, category, status, description, rating } = req.body;
 
-    // Validate required fields
-    if (!name || !price || !category || !status || !image) {
-      return res.status(400).json({
-        message: "Missing required fields: name, price, category, status, or image",
-      });
+    if (!req.file) {
+      return res.status(400).json({ message: "No image file provided." });
     }
+
+    // Upload the image buffer to Cloudinary
+    const imageUrl = await uploadImageToCloudinary(req.file.buffer);
 
     const game = new Game({
       name,
       price,
       category,
       status,
-      image,         // It's a URL string now, not a file
+      image: imageUrl, // Now it's the URL from Cloudinary
       description,
       rating,
     });
