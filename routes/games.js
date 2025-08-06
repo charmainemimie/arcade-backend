@@ -11,14 +11,15 @@ const upload = multer({ storage: storage });
 // CREATE a game
 router.post("/", upload.single('image'), async (req, res) => {
   try {
-    const { name, price, category, status, description, rating } = req.body;
+    const { name, price, category, status, description, rating, image } = req.body;
 
-    if (!req.file) {
-      return res.status(400).json({ message: "No image file provided." });
+    if (!image) {
+      return res.status(400).json({ message: "No image URL provided." });
     }
-
-    // Upload the image buffer to Cloudinary
-    const imageUrl = await uploadImageToCloudinary(req.file.buffer);
+    
+    // image is already a Cloudinary URL
+    const imageUrl = image;
+    
 
     const game = new Game({
       name,
